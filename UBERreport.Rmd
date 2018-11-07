@@ -1,0 +1,62 @@
+---
+title: "UBER report"
+output: html_document
+---
+
+###Load data
+
+Loading data from uber requesting and chekcing head and tail
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+uber <- read.csv("~/OneDrive/EZ4/EZ Career/EZC R online Aug 2018/Lec  (8)/uber/Uber Request Data.csv")
+
+head(uber)
+tail(uber)
+
+```
+
+###Formating data and time
+
+Format date and time, calculate the trip time using drop-request. 
+
+```{r message=FALSE, warning=FALSE}
+library(lubridate)
+uber$Request.timestamp2 <- parse_date_time(x = uber$Request.timestamp, order = c("%d/%m/%Y H:M", "%d-%m-%Y H:M:S"))
+uber$Drop.timestamp2 <- parse_date_time(x = uber$Drop.timestamp, order = c("%d/%m/%Y H:M", "%d-%m-%Y H:M:S"))
+head(uber)
+uber$triptime <- uber$Drop.timestamp2 - uber$Request.timestamp2
+```
+
+
+###Result analysis
+
+We found that 41.9% cases were completed. 
+
+```{r}
+table(uber$Status)
+uber$result <- ifelse(uber$Status == "Trip Completed", "Good", "Bad")
+table(uber$result)
+#percent of complete cases
+2831/(3914+2831)
+
+```
+
+
+###Visualization
+
+It's more likely to cancel a trip in the city compare to airport. 
+
+```{r}
+library(ggplot2)
+ggplot(data = uber, aes(x=result)) + geom_bar()
+
+ggplot(data = uber, aes(x=result, fill = Pickup.point)) + geom_bar()
+
+mean(uber$triptime, na.rm = TRUE)
+
+
+ggplot(uber, aes(x = Request.timestamp2, fill=result)) + geom_histogram()
+ggplot(uber, aes(x = Request.timestamp2, fill=Status)) + geom_histogram() + facet_wrap(~Pickup.point)
+
+```
